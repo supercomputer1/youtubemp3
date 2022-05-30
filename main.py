@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # https://pytube.io/en/latest/user/install.html
 from pytube import YouTube, Playlist
 import argparse
