@@ -1,24 +1,39 @@
 #!/usr/bin/env python3
-
-# https://pytube.io/en/latest/user/install.html
-from pytube import YouTube, Playlist
 import argparse
+import time
+from pytube import YouTube, Playlist
 
 # parse args 
 parser = argparse.ArgumentParser()
-parser.add_argument('--url', required=True, type=str)
+parser.add_argument('--url', required=False, type=str)
+parser.add_argument('--playlist', required=False, type=str)
 args = parser.parse_args()
 
-print(args.url)
+def get_playlist_urls(url): 
+    return Playlist(url).video_urls
 
-video = YouTube(args.url) 
+def get_song(url): 
+    return YouTube(url) 
 
-print(video.title)
+def get_highest_quality_audio_stream(song): 
+    streams = song.streams.filter(only_audio=True, mime_type='audio/mp4').order_by('abr') 
+    return streams[-1] 
 
-streams = video.streams.filter(only_audio=True, mime_type='audio/mp4').order_by('abr')
 
-print(streams) 
+def download_stream(stream, title): 
+    print(f"Downloading {title}..") 
+    stream.download()
+    print("Download complete..")
 
-# download the highest quality i think
-streams[-1].download()
 
+if args.url: 
+    song = get_song(args.url)
+    stream = get_highest_quality_audio_stream(song)
+    download_stream(stream, song.title)
+
+if args.playlist:         
+    for url in get_playlist_urls(args.playlist): 
+        song = get_song(url)
+        stream = get_highest_quality_audio_stream(song)
+        download_stream(stream)
+        time.sleep(3)
